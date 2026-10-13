@@ -1,0 +1,10 @@
+{
+  "name": "factory",
+  "description": "Factory-style orchestration: a general supervisor (main) delegates areas to leads, leads dispatch workers. Agents plus one command; monitoring comes from agent-tree.",
+  "author": {
+    "name": "ueneid"
+  },
+  "dependencies": [
+    "agent-tree"
+  ]
+}

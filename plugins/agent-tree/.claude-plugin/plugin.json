@@ -1,0 +1,7 @@
+{
+  "name": "agent-tree",
+  "description": "Tracks subagents per session (model, tokens, status), writes a snapshot to the shared store, and optionally lets TypeSafe's Jev pick a subagent's model at spawn time",
+  "author": {
+    "name": "ueneid"
+  }
+}

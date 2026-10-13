@@ -1,0 +1,19 @@
+{
+  "name": "ueneid",
+  "description": "Claude Code plugins by ueneid",
+  "owner": {
+    "name": "ueneid"
+  },
+  "plugins": [
+    {
+      "name": "agent-tree",
+      "source": "./plugins/agent-tree",
+      "description": "Per-session subagent tracking (model, tokens, status) with optional model selection at spawn via TypeSafe's Jev API"
+    },
+    {
+      "name": "factory",
+      "source": "./plugins/factory",
+      "description": "Factory-style orchestration agents (lead/worker/explorer/researcher) and /factory:run; depends on agent-tree"
+    }
+  ]
+}
