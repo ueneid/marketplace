@@ -49,8 +49,8 @@ function usage(model: string) {
   return { model, input_tokens: 100, output_tokens: 20, cache_read_input_tokens: 5, cache_creation_input_tokens: 1 }
 }
 
-async function runStep($: any, agentId?: string) {
-  const stream = $.turn.step({ turnId: 't', index: 0, model: 'claude-opus-5-5', messageCount: 1, ...(agentId ? { agentId } : {}) })
+async function runStep($: any, agentId?: string, effort?: string) {
+  const stream = $.turn.step({ turnId: 't', index: 0, model: 'claude-opus-5-5', messageCount: 1, ...(agentId ? { agentId } : {}), ...(effort ? { effort } : {}) } as any)
   let step = await stream.next()
   while (step.done !== true) step = await stream.next()
   return step.value
@@ -212,6 +212,27 @@ test('the status tool says jev: on for all agents under AGENT_TREE_JEV=all', asy
   mock.env(on, { TYPESAFE_API_KEY: 'test-key', AGENT_TREE_JEV: 'all' })
   const all = await $.tool.call({ tool: 'mcp__agent-tree__status' })
   expect(all.result.split('\n')[0]).toBe('jev: on (all agents; Jev picks the model when you leave it unset)')
+})
+
+test('turn.step records a worker’s effort and the status tool shows it with its tokens', async ($, on) => {
+  const saved = new Map<string, unknown>()
+  baseStubs(on, saved)
+  mock.env(on, {})
+  on('agent.spawn', () => ({ model: 'claude-sonnet-5', agentId: 'a1' }))
+  on('turn.step', async function* ($: any, e: any) {
+    yield { kind: 'text', index: 0, text: 'ok' }
+    return { turnId: e.turnId, index: e.index, answer: 'ok', toolUses: [], stopReason: 'end_turn', usage: usage('claude-sonnet-5') }
+  })
+
+  await $.agent.spawn({ prompt: 'x', description: 'piece', subagentType: 'factory:worker' })
+  await runStep($, 'a1', 'high')
+  await runStep($, 'a1')
+
+  const snap = saved.get(KEY) as any
+  expect(snap.workers.a1.effort).toBe('high')
+  const out = await $.tool.call({ tool: 'mcp__agent-tree__status' })
+  expect(out.result).toContain('a1 factory:worker claude-sonnet-5 effort=high running steps=2')
+  expect(out.result).toContain('claude-sonnet-5 in=200 out=40 cache=10/2')
 })
 
 test('turn.complete marks the worker done', async ($, on) => {

@@ -101,7 +101,8 @@ function workerLine(id, w) {
     : w.jev
       ? ` jev=skipped(${w.jev.reason})`
       : ''
-  return `${short(id)} ${w.type} ${w.model ?? '?'} ${w.status} steps=${w.steps}${jev} | ${w.description ?? ''} | ${tokenLine(w.tokens)}`
+  const effort = w.effort ? ` effort=${w.effort}` : ''
+  return `${short(id)} ${w.type} ${w.model ?? '?'}${effort} ${w.status} steps=${w.steps}${jev} | ${w.description ?? ''} | ${tokenLine(w.tokens)}`
 }
 
 // The agents under `rootId` (null = main) as indented lines. The first line
