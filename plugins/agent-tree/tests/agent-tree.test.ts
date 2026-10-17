@@ -92,7 +92,7 @@ test('agent.spawn lets Jev pick the model when it is confident', async ($, on) =
     return { model: e.model ?? 'claude-sonnet-5', agentId: 'a1' }
   })
 
-  await $.agent.spawn({ prompt: 'Find why the auth tests flake', description: 'debug flaky auth', subagentType: 'worker' })
+  await $.agent.spawn({ prompt: 'Find why the auth tests flake', description: 'debug flaky auth', subagentType: 'factory:worker' })
 
   expect(fetches).toBe(1)
   expect(seenModel).toBe('opus')
@@ -113,7 +113,7 @@ test('agent.spawn leaves the model alone when the top choice is below 0.5', asyn
     return { model: 'claude-sonnet-5', agentId: 'a1' }
   })
 
-  await $.agent.spawn({ prompt: 'rename a variable', description: 'rename', subagentType: 'worker' })
+  await $.agent.spawn({ prompt: 'rename a variable', description: 'rename', subagentType: 'factory:worker' })
 
   expect(seenModel).toBeUndefined()
   const snap = saved.get(KEY) as any
@@ -144,6 +144,74 @@ test('agent.spawn skips Jev without an API key and for forks', async ($, on) => 
   const snap = saved.get(KEY) as any
   expect(snap.workers.a1.jev.reason).toBe('no TYPESAFE_API_KEY')
   expect(snap.workers.a2.jev).toBe(null)
+})
+
+test('agent.spawn skips Jev for non-factory agents unless AGENT_TREE_JEV=all', async ($, on) => {
+  const saved = new Map<string, unknown>()
+  baseStubs(on, saved)
+  mock.env(on, { TYPESAFE_API_KEY: 'test-key' })
+  let fetches = 0
+  on('http.fetch', () => {
+    fetches += 1
+    return { value: { status: 200, ok: true, headers: {}, text: jevReply('opus', 0.91) } }
+  })
+  let n = 0
+  const seen: Array<string | undefined> = []
+  on('agent.spawn', ($: any, e: any) => {
+    seen.push(e.model)
+    return { model: e.model ?? 'claude-sonnet-5', agentId: 'a' + ++n }
+  })
+
+  await $.agent.spawn({ prompt: 'x', description: 'other plugin', subagentType: 'superpowers:explorer' })
+  await $.agent.spawn({ prompt: 'x', description: 'typeless', subagentType: undefined } as any)
+  await $.agent.spawn({ prompt: 'x', description: 'factory lead', subagentType: 'factory:lead' })
+
+  expect(fetches).toBe(1)
+  expect(seen).toEqual([undefined, undefined, 'opus'])
+  const snap = saved.get(KEY) as any
+  expect(snap.workers.a1.jev.ok).toBe(false)
+  expect(snap.workers.a1.jev.reason).toBe('off for superpowers:explorer; AGENT_TREE_JEV=all enables it')
+  expect(snap.workers.a2.jev.reason).toBe('off for (no type); AGENT_TREE_JEV=all enables it')
+  expect(snap.workers.a3.jev.applied).toBe(true)
+})
+
+test('AGENT_TREE_JEV=all asks Jev for every agent type', async ($, on) => {
+  const saved = new Map<string, unknown>()
+  baseStubs(on, saved)
+  mock.env(on, { TYPESAFE_API_KEY: 'test-key', AGENT_TREE_JEV: 'all' })
+  let fetches = 0
+  on('http.fetch', () => {
+    fetches += 1
+    return { value: { status: 200, ok: true, headers: {}, text: jevReply('haiku', 0.9) } }
+  })
+  let seenModel: string | undefined = 'unset'
+  on('agent.spawn', ($: any, e: any) => {
+    seenModel = e.model
+    return { model: e.model ?? 'claude-sonnet-5', agentId: 'a1' }
+  })
+
+  await $.agent.spawn({ prompt: 'x', description: 'other plugin', subagentType: 'superpowers:explorer' })
+
+  expect(fetches).toBe(1)
+  expect(seenModel).toBe('haiku')
+  const snap = saved.get(KEY) as any
+  expect(snap.workers.a1.jev.applied).toBe(true)
+})
+
+test('the status tool says which agents Jev covers', async ($, on) => {
+  const saved = new Map<string, unknown>()
+  baseStubs(on, saved)
+  mock.env(on, { TYPESAFE_API_KEY: 'test-key' })
+  const scoped = await $.tool.call({ tool: 'mcp__agent-tree__status' })
+  expect(scoped.result.split('\n')[0]).toBe('jev: on for factory:* (Jev picks the model when you leave it unset; AGENT_TREE_JEV=all covers every agent)')
+})
+
+test('the status tool says jev: on for all agents under AGENT_TREE_JEV=all', async ($, on) => {
+  const saved = new Map<string, unknown>()
+  baseStubs(on, saved)
+  mock.env(on, { TYPESAFE_API_KEY: 'test-key', AGENT_TREE_JEV: 'all' })
+  const all = await $.tool.call({ tool: 'mcp__agent-tree__status' })
+  expect(all.result.split('\n')[0]).toBe('jev: on (all agents; Jev picks the model when you leave it unset)')
 })
 
 test('turn.complete marks the worker done', async ($, on) => {

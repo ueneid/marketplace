@@ -28,6 +28,8 @@ const FLEET = 'agent-tree-fleet'
 let fleetFilterState = { repo: '', running: false, worktree: false }
 let jevKey = null
 let jevKeyReason = null
+// AGENT_TREE_JEV=all widens Jev from factory:* agents to every spawn. Read once per session.
+let jevScope = null
 
 // After a reload the module starts empty: read this session's record back
 // so running workers keep their type, name and history.
@@ -159,6 +161,18 @@ async function resolveJevKey($) {
   return ''
 }
 
+// Jev covers factory:* by default; AGENT_TREE_JEV=all covers every agent type.
+async function resolveJevScope($) {
+  if (jevScope) return jevScope
+  const raw = await $.env.get('AGENT_TREE_JEV')
+  jevScope = String(raw ?? '').trim().toLowerCase() === 'all' ? 'all' : 'factory'
+  return jevScope
+}
+
+function jevCovers(scope, subagentType) {
+  return scope === 'all' || String(subagentType ?? '').startsWith('factory:')
+}
+
 async function askJev($, e, key) {
   const init = {
     method: 'POST',
@@ -254,21 +268,29 @@ export function register(on) {
   on('tool.call', { tool: 'mcp__agent-tree__status' }, async ($, e) => {
     // First line: whether Jev will pick models, so leads know when to choose.
     const key = await resolveJevKey($)
-    const jevLine = key ? 'jev: on (Jev picks the model when you leave it unset)' : 'jev: off (' + (jevKeyReason ?? 'no key') + '; pick model yourself)'
+    const scope = key ? await resolveJevScope($) : null
+    const jevLine = !key
+      ? 'jev: off (' + (jevKeyReason ?? 'no key') + '; pick model yourself)'
+      : scope === 'all'
+        ? 'jev: on (all agents; Jev picks the model when you leave it unset)'
+        : 'jev: on for factory:* (Jev picks the model when you leave it unset; AGENT_TREE_JEV=all covers every agent)'
     return { result: [jevLine, ...formatTree(workers, e.agentId ?? null)].join('\n') }
   })
 
   // Jev picks the tier when the caller left `model` open. Forks always inherit.
+  // Only factory:* agents are sent to Jev unless AGENT_TREE_JEV=all.
   on('agent.spawn', async ($, e, next) => {
     let jev = null
     let input = e
     if (!e.fork && !e.model) {
       const key = await resolveJevKey($)
-      if (key) {
+      if (!key) {
+        jev = { ok: false, reason: jevKeyReason }
+      } else if (!jevCovers(await resolveJevScope($), e.subagentType)) {
+        jev = { ok: false, reason: 'off for ' + (e.subagentType ?? '(no type)') + '; AGENT_TREE_JEV=all enables it' }
+      } else {
         jev = await askJev($, e, key)
         if (jev.ok && jev.applied) input = { ...e, model: jev.choice }
-      } else {
-        jev = { ok: false, reason: jevKeyReason }
       }
     }
     const result = await next(input)
