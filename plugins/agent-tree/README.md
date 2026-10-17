@@ -38,7 +38,7 @@ have to be a mod pane.
 { id, cwd, repo, orca: { workspace, worktree, pane } | null, startedAt, updatedAt, endedAt,
   links: [{ dir: 'out', to } | { dir: 'in', from }],
   main: { model, tokens: { [model]: { input, output, cacheRead, cacheWrite } } },
-  workers: { [agentId]: { type, description, model, requestedModel, fork, background,
+  workers: { [agentId]: { type, description, model, effort, requestedModel, fork, background,
                           parentAgentId, status, startedAt, updatedAt, durationMs,
                           steps, tokens, jev: { ok, choice, confidence, probabilities, applied, reason } } } }
 ```
@@ -63,8 +63,10 @@ op run --env-file=.env -- claude
 ## Commands
 
 - Tool `mcp__agent-tree__status`: first line `jev: on` / `jev: off (reason)`, then the agents as a
-  tree: main sees every agent; a subagent calling it sees only its own subtree (factory's leads use
-  this to decide whether to pick models themselves).
+  tree, one line each: `<agentId> <type> <model> effort=<effort> <status> steps=<n> [jev=...] |
+  <description> | <model> in=<n> out=<n> cache=<read>/<write>`. Main sees every agent; a subagent
+  calling it sees only its own subtree (factory's leads use this to decide whether to pick models
+  themselves and to copy model / effort / tokens into the run record).
 - The monitor pane opens by itself when the first subagent starts (terminal at least
   144 columns wide; otherwise a toast says so). `/agent-tree open` / `/agent-tree close`
   open and close it by hand. It shows the main session's bar, one card per department

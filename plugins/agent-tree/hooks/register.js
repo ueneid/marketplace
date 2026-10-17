@@ -355,6 +355,7 @@ export function register(on) {
           steps: prev.steps + 1,
           updatedAt: now,
           model: result.usage?.model ?? prev.model,
+          effort: e.effort ?? prev.effort ?? null,
           tokens: addUsage(prev.tokens, result.usage),
         },
       }
