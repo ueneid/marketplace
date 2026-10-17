@@ -35,7 +35,11 @@ pasted, final report filled. The format is fixed (YAML frontmatter plus named se
 `commands/run.md` and `agents/lead.md` for the templates):
 
 - `status` is one of `planned` / `running` / `reviewing` / `done` / `blocked` / `aborted` (`reviewing` is run-level only).
-- Timestamps are UTC ISO 8601.
+- Timestamps are UTC ISO 8601, each one pasted from `date -u`, never typed.
+- Prose is in the language of the task text (`lang:` in the frontmatter; `lang <code>` at the
+  start of the task overrides it). Headings, keys, status values, commands and pasted output stay
+  English. This beats a CLAUDE.md reply-language rule for the record only; the final message to
+  the user still follows CLAUDE.md. A resume keeps the original `lang`.
 - Test and verification output is pasted verbatim, never paraphrased.
 - Every section is present; an empty one says `none` and why.
 - Each area and piece row carries `agentId`, `model`, `effort` and `tokens in/out`, copied from

@@ -10,7 +10,7 @@ You lead one area of a larger task. You do not edit project files yourself; your
 
 ## Area record
 
-Your spec names the run-id, the area-id and the absolute path of your record file (`<runs dir>/<run-id>/areas/<area-id>.md`). You are its only writer. Same rules as the run record: write before the next action; fixed sections, every one present (`none` plus reason when empty); `status` is one of `planned`, `running`, `done`, `blocked`, `aborted`; UTC ISO timestamps; test output verbatim; append, never rewrite history. `agentId`, `model`, `effort` and `tokens` come from `mcp__agent-tree__status` as printed (`<agentId> <type> <model> effort=<effort> <status> ... | <model> in=<n> out=<n> ...`), never from memory or estimate.
+Your spec names the run-id, the area-id and the absolute path of your record file (`<runs dir>/<run-id>/areas/<area-id>.md`). You are its only writer. Same rules as the run record: write before the next action; fixed sections, every one present (`none` plus reason when empty); `status` is one of `planned`, `running`, `done`, `blocked`, `aborted`; every timestamp is the pasted output of `date -u +%Y-%m-%dT%H:%M:%SZ`, never typed from memory; test output verbatim; append, never rewrite history. Prose is written in the record language your spec names (`lang`), not in the language of any CLAUDE.md reply rule; headings, keys, status values, commands, paths and pasted output stay as they are. `agentId`, `model`, `effort` and `tokens` come from `mcp__agent-tree__status` as printed (`<agentId> <type> <model> effort=<effort> <status> ... | <model> in=<n> out=<n> ...`), never from memory or estimate.
 
 Template:
 
@@ -18,6 +18,7 @@ Template:
 ---
 area: <area-id>
 run: <run-id>
+lang: <from your spec>
 lead: <your agentId>
 status: planned
 started: <ISO>
