@@ -22,7 +22,7 @@ Tested with Claude Code 2.1.288.
 ## Model choice without Jev
 
 Every agent file says `model: sonnet`. With `TYPESAFE_API_KEY` set, agent-tree's Jev hook
-picks the tier at spawn. Without it, the briefs tell main (for leads) and leads (for their
+picks the tier at spawn for every `factory:*` agent (no other setting needed). Without it, the briefs tell main (for leads) and leads (for their
 pieces) to call `mcp__agent-tree__status`, read its first line (`jev: on` / `jev: off`), and
 when off, pass `model` themselves: opus for ambiguous or cross-cutting work, sonnet for routine
 scoped work, haiku for mechanical edits.

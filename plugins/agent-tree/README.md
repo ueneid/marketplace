@@ -7,8 +7,10 @@ tokens), writes one snapshot per session to the shared mod store, and asks Jev
 
 Jev is a hosted judgment model from [TypeSafe](https://typesafe.ai). It is optional:
 without `TYPESAFE_API_KEY` nothing is sent anywhere and the model is left as given.
-With the key set, each spawn POSTs the subagent's `description` and the first 8000
-characters of its `prompt` to `api.typesafe.ai`, so do not enable it where prompts
+With the key set, only `factory:*` agents are sent to Jev by default (so `/factory:run`
+always gets it, other plugins' subagents never do). Set `AGENT_TREE_JEV=all` to cover
+every spawn. Each covered spawn POSTs the subagent's `description` and the first 8000
+characters of its `prompt` to `api.typesafe.ai`, so do not widen it where prompts
 may carry secrets you do not want to leave the machine.
 
 `orca` in the snapshot is the workspace / worktree / pane tag of
@@ -21,7 +23,7 @@ Tested with Claude Code 2.1.288.
 
 | Event | What happens |
 | --- | --- |
-| `agent.spawn` | If `TYPESAFE_API_KEY` is set, not a fork, and no `model` was given: POST to TypeSafe and set `model` to Jev's top choice when that choice's probability is >= 0.5. Records the worker with the verdict. |
+| `agent.spawn` | If `TYPESAFE_API_KEY` is set, the type is `factory:*` (or `AGENT_TREE_JEV=all`), not a fork, and no `model` was given: POST to TypeSafe and set `model` to Jev's top choice when that choice's probability is >= 0.5. Records the worker with the verdict. |
 | `turn.step` | Adds the request's usage to the worker (`e.agentId`) or to main. |
 | `turn.complete` | Marks the worker done / aborted. |
 | `session.start` / `session.end` | Registers `/agent-tree`, writes the first and last snapshot. |
@@ -43,8 +45,10 @@ have to be a mod pane.
 
 ## Jev API key
 
-The mod reads `TYPESAFE_API_KEY` from the environment once per session. Without it,
-Jev is skipped and each worker's `jev.reason` says `no TYPESAFE_API_KEY`.
+The mod reads `TYPESAFE_API_KEY` and `AGENT_TREE_JEV` from the environment once per session.
+Without the key, Jev is skipped and each worker's `jev.reason` says `no TYPESAFE_API_KEY`.
+With the key but a non-`factory:` type, `jev.reason` says `off for <type>; AGENT_TREE_JEV=all enables it`.
+The status tool's first line is `jev: off (...)`, `jev: on for factory:* (...)` or `jev: on (all agents; ...)`.
 
 Keep the key in 1Password and inject it only for the `claude` process, for example:
 
