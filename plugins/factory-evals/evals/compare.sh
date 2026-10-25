@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Run the factory eval suite against one or more variants of the plugin and print
 # the scores side by side. A variant is a directory whose files overlay
-# plugins/factory (for example variants/no-lead/commands/run.md). The unmodified
+# plugins/factory (for example variants/with-lead/commands/run.md). The unmodified
 # plugin is always run first as "baseline".
 #
-#   evals/compare.sh [--case GLOB] [--tag TAG] [--runs N] [-j N] [--max-cost USD] [--allow-network] [VARIANT_DIR...]
+#   plugins/factory-evals/evals/compare.sh [--case GLOB] [--tag TAG] [--runs N] [-j N] [--max-cost USD] [--allow-network] [VARIANT_DIR...]
 #
-# Each variant runs in its own copy of plugins/ (factory plus agent-tree, which the
-# eval loader only accepts when both sit under the same target root). Results land
-# in evals/results/compare-<timestamp>/<variant>.json, with the agent mix per run read from the
+# Each variant runs in its own copy of plugins/ (factory, agent-tree and this suite, which
+# the eval loader only accepts when all sit under the same target root). Results land
+# in plugins/factory-evals/evals/results/compare-<timestamp>/<variant>.json, with the agent mix per run read from the
 # kept trace, which is copied to results/<variant>/traces/ before the sandbox is removed. Nothing is published.
 set -euo pipefail
 
-here="$(cd "$(dirname "$0")" && pwd)"            # plugins/factory/evals
+here="$(cd "$(dirname "$0")" && pwd)"            # plugins/factory-evals/evals
 plugins_dir="$(cd "$here/../.." && pwd)"         # plugins/
 case_glob='*'; tag=''; runs=2; max_cost=''; network=0; jobs=1
 variants=()
@@ -44,12 +44,13 @@ run_one() { # name overlay-dir-or-empty
   mkdir -p "$root/plugins"
   cp -R "$plugins_dir/factory" "$root/plugins/factory"
   cp -R "$plugins_dir/agent-tree" "$root/plugins/agent-tree"
-  rm -rf "$root/plugins/factory/evals/results"
+  cp -R "$plugins_dir/factory-evals" "$root/plugins/factory-evals"
+  rm -rf "$root/plugins/factory-evals/evals/results"
   if [ -n "$overlay" ]; then
     (cd "$overlay" && find . -type f -not -name 'README.md' -not -name 'VARIANT.md' | while read -r f; do
       mkdir -p "$root/plugins/factory/$(dirname "$f")"; cp "$f" "$root/plugins/factory/$f"; done)
   fi
-  local args=(plugin eval "$root" --eval-dir plugins/factory/evals --case "$case_glob" --runs "$runs"
+  local args=(plugin eval "$root" --eval-dir plugins/factory-evals/evals --case "$case_glob" --runs "$runs"
               --ablation none -j "$jobs" --scaffold --trust-plugin --keep-temp --allow-tools "${tools[@]}" --no-publish
               --output-dir "$out/$name" --json "$out/$name.json")
   [ -n "$tag" ] && args+=(--tag "$tag")

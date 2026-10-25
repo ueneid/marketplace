@@ -11,4 +11,4 @@ $2.16 against $1.58 per run (n=2). See the factory README, "Measurements so far"
 
 Re-run the comparison with:
 
-    evals/compare.sh --case large-five-areas --runs 2 -j 2 plugins/factory/evals/variants/with-lead
+    plugins/factory-evals/evals/compare.sh --case large-five-areas --runs 2 -j 2 plugins/factory-evals/evals/variants/with-lead
