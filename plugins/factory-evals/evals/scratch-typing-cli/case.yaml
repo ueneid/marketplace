@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: scratch-typing-cli
+description: "Build a small typing game from an empty repo. Open-ended; measures planning and the quality of self-chosen structure and tests."
+tags: [full, scratch]
+expected_outcome: "a Node project with pure scoring logic in src/, a CLI entry, node:test tests, node --test green."
+context:
+  scaffold_script: fixture.sh

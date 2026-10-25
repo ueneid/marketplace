@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: cross-cutting-rename
+description: "Rename one identifier across six files (source, tests, README). Many small disjoint edits; measures coordination overhead and completeness."
+tags: [full, rename]
+expected_outcome: "no `userId` left anywhere; `accountId` everywhere; node --test green."
+context:
+  scaffold_script: fixture.sh

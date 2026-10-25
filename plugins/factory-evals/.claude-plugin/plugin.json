@@ -1,0 +1,8 @@
+{
+  "name": "factory-evals",
+  "description": "Eval suite for the factory plugin. Not listed in the marketplace, so it is never installed; run it from the marketplace root with `claude plugin eval . --eval-dir plugins/factory-evals/evals`.",
+  "author": {
+    "name": "ueneid"
+  },
+  "experimental": { "evals": "evals" }
+}

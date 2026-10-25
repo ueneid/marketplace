@@ -1,12 +1,11 @@
 # factory
 
-Orchestration only: six agents and one command. No code. Monitoring and Jev model
+Orchestration only: five agents and one command. No code. Monitoring and Jev model
 selection (an optional TypeSafe API, see agent-tree's README) come from the `agent-tree`
 plugin, which this one depends on.
 
 | Agent | Role |
 | --- | --- |
-| `factory:lead` | Department lead: splits one area into worker-sized pieces, dispatches, verifies, reports. Can only spawn the three below. |
 | `factory:worker` | Edits files and runs the tests for one well-specified piece. |
 | `factory:explorer` | Read-only code exploration. |
 | `factory:researcher` | Documentation lookup with a URL per claim. |
@@ -15,7 +14,7 @@ plugin, which this one depends on.
 
 `/factory:run <task>` hands the task to the main session as the general supervisor.
 You never name the agents yourself; the brief does. Progress shows in agent-tree's
-status line and panes; leads call `mcp__agent-tree__status` to see their own department.
+status line and panes; main calls `mcp__agent-tree__status` to see every worker.
 Every run also leaves a written record (next section).
 
 ## Run records
@@ -25,14 +24,14 @@ where `<repo>` is the basename of the git root (or of the cwd), `<branch>` is th
 with `/` turned into `__` (or `detached-<sha>`), and the id is `<UTC yyyymmdd-hhmmss>-<slug>`.
 Grouping by branch means a plain `/factory:run` sees only this branch's unfinished runs, which
 is what a re-run on the same worktree wants. Records stay out of the project tree, so nothing has to be
-gitignored and a removed worktree does not take its history with it. Main owns `run.md`; each
-lead owns `areas/<area-id>.md`. The files have one writer each, so they follow the same
-non-overlap rule as code.
+gitignored and a removed worktree does not take its history with it. Main owns `run.md` and is its
+only writer; workers never touch the record, main copies what they report. (Runs made before
+2026-10-25 also have `areas/<area-id>.md` files written by the lead tier of that time.)
 
 The record is written at every checkpoint, before the next action: run created, exploration
-done, plan made, each lead dispatched, each lead reported, review recorded, final verification
+done, plan made, each worker dispatched, each worker reported, review recorded, final verification
 pasted, final report filled. The format is fixed (YAML frontmatter plus named sections; see
-`commands/run.md` and `agents/lead.md` for the templates):
+`commands/run.md` for the template):
 
 - `status` is one of `planned` / `running` / `reviewing` / `done` / `blocked` / `aborted` (`reviewing` is run-level only).
 - Timestamps are UTC ISO 8601, each one pasted from `date -u`, never typed.
@@ -65,16 +64,23 @@ Tested with Claude Code 2.1.288.
 ## Model choice without Jev
 
 Every agent file says `model: sonnet`. With `TYPESAFE_API_KEY` set, agent-tree's Jev hook
-picks the tier at spawn for every `factory:*` agent (no other setting needed). Without it, the briefs tell main (for leads) and leads (for their
-pieces) to call `mcp__agent-tree__status`, read its first line (`jev: on` / `jev: off`), and
+picks the tier at spawn for every `factory:*` agent (no other setting needed). Without it, the brief tells main to call `mcp__agent-tree__status`, read its first line (`jev: on` / `jev: off`), and
 when off, pass `model` themselves: opus for ambiguous or cross-cutting work, sonnet for routine
 scoped work, haiku for mechanical edits.
 
 ## Effort
 
 Following the Claude Code guidance (medium = clear-scope day-to-day work; high = where
-verification matters): lead and reviewer run at `high`, worker / explorer / researcher /
+verification matters): reviewer runs at `high`, worker / explorer / researcher /
 verifier at `medium`. Main keeps the session's level.
+
+## Evals
+
+The eval suite lives in `plugins/factory-evals/` (not listed in the marketplace, so it is never
+installed). Its README has the cases, how to run them and the measurements. Headline, measured
+2026-10-25: on a 28-file / 5-area task the earlier design spawned 5 leads and 10–13 workers per
+run and tied on correctness (42/42 in every run) with 6 workers dispatched directly by main, at
+a mean $2.16 against $1.58 per run (n=2). That is why there is no lead tier.
 
 ## Install
 

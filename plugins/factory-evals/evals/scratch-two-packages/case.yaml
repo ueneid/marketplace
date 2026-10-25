@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: scratch-two-packages
+description: "Two packages from nothing with a clean interface between them (core library and CLI app). Parallel areas with one dependency edge; measures how the plan handles an interface."
+tags: [full, scratch, lead]
+expected_outcome: "packages/core and apps/cli; cli imports core through the workspace link; tests in both; node --test green from the root."
+context:
+  scaffold_script: fixture.sh

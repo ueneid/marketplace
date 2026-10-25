@@ -13,7 +13,7 @@
     {
       "name": "factory",
       "source": "./plugins/factory",
-      "description": "Factory-style orchestration agents (lead/worker/explorer/researcher) and /factory:run; depends on agent-tree"
+      "description": "Factory-style orchestration agents (worker/explorer/researcher/reviewer/verifier) and /factory:run; depends on agent-tree"
     }
   ]
 }
