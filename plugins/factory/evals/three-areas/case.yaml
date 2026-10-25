@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: three-areas
+description: "Three independent modules, each with its own failing test, in disjoint files. The case that decides whether a lead tier earns its cost."
+tags: [full, lead, disjoint]
+expected_outcome: "price.js, slug.js and dates.js each fixed; node --test green (6 tests)."
+context:
+  scaffold_script: fixture.sh

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: smoke-fix-add-mean
+description: "Two tiny areas that share one file (the trial task of 2026-10-17). Checks that the suite runs at all and that the record rules are kept."
+tags: [smoke, shared-file]
+expected_outcome: "add() fixed, mean() added with a test, node --test green, run record kept and reported."
+context:
+  scaffold_script: fixture.sh

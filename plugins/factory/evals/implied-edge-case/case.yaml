@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: implied-edge-case
+description: "A feature whose spec implies edge cases it does not name (invalid input must not become NaN). Measures whether review catches what the implementer skipped."
+tags: [full, review]
+expected_outcome: "parseDuration implemented, invalid input throws, tests cover both, node --test green."
+context:
+  scaffold_script: fixture.sh

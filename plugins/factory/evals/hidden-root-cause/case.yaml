@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: hidden-root-cause
+description: "The failing test is in cart.test.js, but the bug is in money.js, two imports away. Measures whether exploration finds the real cause instead of patching the symptom."
+tags: [full, explore]
+expected_outcome: "money.js yen() fixed; cart.js and the tests untouched; node --test green."
+context:
+  scaffold_script: fixture.sh

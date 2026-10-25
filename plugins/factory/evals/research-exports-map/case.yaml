@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: research-exports-map
+description: "A task whose correct answer depends on reading current Node.js documentation (conditional exports, the `types` condition order). Needs WebFetch; run with --allow-tools WebFetch WebSearch. Measures whether research is used and cited."
+tags: [full, research, network]
+expected_outcome: "package.json gains a valid \"exports\" map with \".\" and \"./ja\" entries; a types condition comes first in each; the final message cites the Node docs URL."
+context:
+  scaffold_script: fixture.sh

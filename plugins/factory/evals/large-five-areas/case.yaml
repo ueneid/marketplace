@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: large-five-areas
+description: "A 28-file family-schedule library with five independent areas (calendar, tasks, inventory, notify, sync), each needing two or three changes across several of its files; 14 failing tests (of 42). Big enough that the work splits into areas with several pieces each: the case for whether a lead tier appears and earns its cost."
+tags: [full, lead, large]
+expected_outcome: "All 12 planted defects (14 failing tests) fixed inside their own area; node --test green from the root; tests untouched."
+context:
+  scaffold_script: fixture.sh

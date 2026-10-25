@@ -1,6 +1,6 @@
 {
   "name": "factory",
-  "description": "Factory-style orchestration: a general supervisor (main) delegates areas to leads, leads dispatch workers. Agents plus one command; every run keeps a resumable record under $XDG_CONFIG_HOME/factory/runs/; monitoring comes from agent-tree.",
+  "description": "Factory-style orchestration: a supervisor (main) plans, dispatches one worker per area and reviews. Agents plus one command; every run keeps a resumable record under $XDG_CONFIG_HOME/factory/runs/; monitoring comes from agent-tree.",
   "author": {
     "name": "ueneid"
   },

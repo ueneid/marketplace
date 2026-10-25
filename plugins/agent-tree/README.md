@@ -65,12 +65,12 @@ op run --env-file=.env -- claude
 - Tool `mcp__agent-tree__status`: first line `jev: on` / `jev: off (reason)`, then the agents as a
   tree, one line each: `<agentId> <type> <model> effort=<effort> <status> steps=<n> [jev=...] |
   <description> | <model> in=<n> out=<n> cache=<read>/<write>`. Main sees every agent; a subagent
-  calling it sees only its own subtree (factory's leads use this to decide whether to pick models
-  themselves and to copy model / effort / tokens into the run record).
+  calling it sees only its own subtree (factory's main uses this to decide whether to pick models
+  itself and to copy model / effort / tokens into the run record).
 - The monitor pane opens by itself when the first subagent starts (terminal at least
   144 columns wide; otherwise a toast says so). `/agent-tree open` / `/agent-tree close`
-  open and close it by hand. It shows the main session's bar, one card per department
-  (lead or top-level worker) with its model, Jev verdict, token bar and workers, and a
+  open and close it by hand. It shows the main session's bar, one card per top-level
+  subagent with its model, Jev verdict, token bar and workers, and a
   log of spawn/done events.
 - The graph is always drawn. When it is wider than the pane it becomes a window: `h` / `l`
   (or the ◀ ▶ buttons) scroll it sideways, and the header says `cols 41–194 of 302`. `g`

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: lang-english
+description: "Same shape as the smoke case but the task is written in English. Checks the record-language rule (lang: en, English prose in run.md) while CLAUDE.md-style reply rules would say Japanese."
+tags: [full, lang]
+expected_outcome: "bug fixed, node --test green, run.md written with lang en and English prose."
+context:
+  scaffold_script: fixture.sh
